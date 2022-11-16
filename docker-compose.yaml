@@ -1,0 +1,61 @@
+version: '3.9'
+services:
+  keycloak-node-1:
+    build: .
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 5
+    command: start-dev
+    ports:
+      - 8080:8080
+    environment:
+      - KEYCLOAK_ADMIN=root
+      - KEYCLOAK_ADMIN_PASSWORD=root
+      - KC_DB=mysql
+      - KC_DB_USERNAME=root
+      - KC_DB_PASSWORD=root
+      - KC_DB_URL_HOST=mysql
+      - KC_DB_SCHEMA=keycloak
+    networks:
+      - keycloak
+    depends_on:
+      - mysql
+
+  keycloak-node-2:
+    build: .
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 5
+    command: start-dev
+    ports:
+      - 8081:8080
+    environment:
+      - KEYCLOAK_ADMIN=root
+      - KEYCLOAK_ADMIN_PASSWORD=root
+      - KC_DB=mysql
+      - KC_DB_USERNAME=root
+      - KC_DB_PASSWORD=root
+      - KC_DB_URL_HOST=mysql
+      - KC_DB_SCHEMA=keycloak
+    networks:
+      - keycloak
+    depends_on:
+      - mysql
+      - keycloak-node-1
+
+  mysql:
+    image: mysql:8.0.31
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=keycloak
+    networks:
+      - keycloak
+
+networks:
+  keycloak:
